@@ -2,7 +2,7 @@ import re
 
 # Tokenizer function (tokenizes only the key)
 def tokenize(text):
-    """Tokenizes and cleans text by removing punctuation and converting to lowercase."""
+    """Tokenizes and cleans text by removing punctuation (including ?,!) and converting to lowercase."""
     return tuple(re.sub(r'[^\w\s]', '', text.lower()).split())
 
 # Function to count matches for the query in a document
@@ -32,3 +32,33 @@ def rank_documents(match_counts, documents):
     
     # Return the top 1 document (first in the sorted list)
     return documents[sorted_count[0][0]] if sorted_count else None
+
+
+# Function to expand short forms in user queries and this is the updated function in Version 2
+def expand_shortforms(query, shortforms_dict):
+    """Expands abbreviations in user queries using the shortforms dictionary."""
+    words = query.split()
+    expanded_words = []
+    
+    # Check for multi-word abbreviations
+    query_lower = query.lower()
+    for abbreviation, expansion in shortforms_dict.items():
+        # Use regex to replace multi-word abbreviations
+        if abbreviation in query_lower:
+            query = query.replace(abbreviation, expansion)
+    
+    words = query.split()
+    
+    for word in words:
+        lower_word = word.lower()
+        if lower_word in shortforms_dict:
+            # Preserve original capitalization of the first letter if present
+            if word[0].isupper():
+                expanded = shortforms_dict[lower_word].capitalize()
+            else:
+                expanded = shortforms_dict[lower_word]
+            expanded_words.append(expanded)
+        else:
+            expanded_words.append(word)
+    
+    return ' '.join(expanded_words)
