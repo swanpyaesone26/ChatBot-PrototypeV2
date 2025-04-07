@@ -62,3 +62,18 @@ def expand_shortforms(query, shortforms_dict):
             expanded_words.append(word)
     
     return ' '.join(expanded_words)
+
+# Function to expand synonyms in user queries this is the updated function in Version 2
+def expand_synonyms(query, synonym_dict):
+    words = query.split()
+    expanded_query = []
+    for word in words:
+        lower_word = word.lower()
+        # Check if word is a synonym key or value
+        for canonical, variants in synonym_dict.items():
+            if lower_word == canonical or lower_word in variants:
+                expanded_query.append(canonical)
+                break
+        else:
+            expanded_query.append(word)
+    return ' '.join(expanded_query)

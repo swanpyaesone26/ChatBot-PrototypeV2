@@ -1,4 +1,4 @@
-from functions import tokenize, count_matches_per_document, rank_documents,expand_shortforms
+from functions import tokenize, count_matches_per_document, rank_documents,expand_shortforms,expand_synonyms
 
 uni_document = {
     "Excuse me, where is the registration office?": "It's on the first floor of the administration building, Room 102.",
@@ -10,7 +10,7 @@ uni_document = {
     "How do I apply for a dorm room?": "You need to submit a housing application online before the deadline.",
     "Are there scholarships available for international students?": "Yes, we offer several scholarships. You can get the list from the scholarship office or our website.",
     "Where is the library?" : "The library is behind the science building.",
-    "What is the open hour of library?": "It’s open from 8 a.m. to 8 p.m. on weekdays.",
+    "What is the open hour of library?": "Library opens from 8 a.m. to 8 p.m. on weekdays.",
     "Can I change my course after registration?": "Yes, but only during the add/drop period, which ends in the second week of classes.",
     "Who can I contact if I have IT problems with my student portal": "You should contact the IT support center at Room 305 in the admin building or email support@university.edu.",
     "Where do I pay my tuition fees?": "You can pay online through the portal or at the finance office on the second floor.",
@@ -212,20 +212,97 @@ shortforms = {
 }
 
 
+#This is the synonym dictionary which is added in V2
+synonym_dict = {
+    # 🔹 Locations & Facilities
+    "library": ["reading room", "learning commons"],
+    "student services": ["student help center", "student office", "support office"],
+    "registrar": ["registration office", "student records office"],
+    "dorm": ["residence hall", "student housing"],
+    "cafeteria": ["canteen", "dining hall"],
+    "computer lab": ["IT lab", "tech lab"],
+    "main office": ["administrative office", "front desk"],
+    "study room": ["group room", "collaborative space"],
+    "lost and found": ["missing items desk", "lost property office"],
+    "building": ["hall", "structure", "facility"],
+    "entrance": ["entry", "main door", "entryway"],
+    "parking lot": ["car park", "vehicle area"],
+
+    # 🔹 People & Roles
+    "staff": ["employees", "faculty"],
+    "advisor": ["counselor", "mentor"],
+    "librarian": ["library staff", "information assistant"],
+    "technician": ["IT staff", "tech support"],
+
+    # 🔹 Common Items / Resources
+    "student ID": ["ID card", "identification card"],
+    "transcript": ["academic record", "grade report"],
+    "form": ["application", "document", "paperwork"],
+    "Wi-Fi": ["internet access", "wireless connection", "WiFi"],
+    "printer": ["printing station", "copy machine"],
+    "laptop loan": ["device checkout", "computer rental"],
+    "locker": ["storage unit", "storage locker"],
+    "book": ["textbook", "volume"],
+    "journal": ["academic journal", "periodical"],
+    "notebook": ["exercise book", "writing pad"],
+    "handout": ["flyer", "pamphlet"],
+
+    # 🔹 Time & Hours
+    "hours": ["times", "schedule"],
+    "open": ["available", "operating"],
+    "close": ["shut", "end"],
+    "break": ["holiday", "vacation", "time off"],
+    "deadline": ["due date", "cutoff date"],
+    "timetable": ["schedule", "calendar"],
+
+    # 🔹 Actions / Processes
+    "how do I": ["what's the process to", "how can I", "what do I need to do to"],
+    "where is": ["how do I get to", "can you tell me the location of", "where can I find"],
+    "submit": ["turn in", "send", "upload"],
+    "fill out": ["complete", "write in", "enter information"],
+    "request": ["ask for", "apply for"],
+    "apply": ["enroll", "register"],
+    "register": ["sign up", "enroll"],
+    "reset": ["change", "recover"],
+    "find": ["look for", "search"],
+    "borrow": ["check out", "loan"],
+    "return": ["give back", "drop off"],
+    "attend": ["join", "participate in"],
+
+    # 🔹 Fees & Policies
+    "fines": ["late fees", "penalties"],
+    "tuition": ["school fees", "education cost"],
+    "pet policy": ["animal rules", "animal allowance"],
+    "dress code": ["attire rules", "clothing policy"],
+    "rules": ["regulations", "policies"],
+
+    # 🔹 Services / Events
+    "orientation": ["welcome session", "intro event"],
+    "workshop": ["training", "seminar"],
+    "event": ["activity", "program"],
+    "counseling": ["guidance", "advising"],
+    "maintenance": ["repair", "fixing service"],
+    "transport": ["shuttle", "bus service"],
+}
+
+
+
 # Input processing pipeline
 user_question = input("Please enter your question: ")
 
 # Step 1: Expand short forms
 expanded_question = expand_shortforms(user_question, shortforms)
 
-# Step 2: Tokenize the expanded question
-user_question_tokens = tokenize(expanded_question)
+# Step 2: Expand synonyms
+expanded_q = expand_synonyms(expanded_question, synonym_dict)  # This is the version we want to use
 
-# Step 3: Process as before
+# Step 3: Tokenize the FULLY expanded question 
+user_question_tokens = tokenize(expanded_q)  # Changed from expanded_question to expanded_q
+
+# Rest remains the same...
 uni_document_tokenized = {tokenize(key): value for key, value in uni_document.items()}
 document_tokens = list(uni_document_tokenized.keys())
 match_counts = count_matches_per_document(document_tokens, user_question_tokens)
 best_matching_document = rank_documents(match_counts, list(uni_document.values()))
 
-# Output the result
 print(best_matching_document if best_matching_document else "Sorry, I couldn't find an answer to your question.")
