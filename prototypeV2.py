@@ -1,5 +1,4 @@
-import re
-from prototypeV2 import tokenize, count_matches_per_document, rank_documents
+from functions import tokenize, count_matches_per_document, rank_documents,expand_shortforms
 
 uni_document = {
     "Excuse me, where is the registration office?": "It's on the first floor of the administration building, Room 102.",
@@ -10,7 +9,8 @@ uni_document = {
     "Is there a lost and found on campus?": "Yes, it's located at the security office near the main gate.",
     "How do I apply for a dorm room?": "You need to submit a housing application online before the deadline.",
     "Are there scholarships available for international students?": "Yes, we offer several scholarships. You can get the list from the scholarship office or our website.",
-    "Where is the library and what are its hours?": "The library is behind the science building. It’s open from 8 a.m. to 8 p.m. on weekdays.",
+    "Where is the library?" : "The library is behind the science building.",
+    "What is the open hour of library?": "It’s open from 8 a.m. to 8 p.m. on weekdays.",
     "Can I change my course after registration?": "Yes, but only during the add/drop period, which ends in the second week of classes.",
     "Who can I contact if I have IT problems with my student portal": "You should contact the IT support center at Room 305 in the admin building or email support@university.edu.",
     "Where do I pay my tuition fees?": "You can pay online through the portal or at the finance office on the second floor.",
@@ -212,21 +212,20 @@ shortforms = {
 }
 
 
-# Input question from the user
+# Input processing pipeline
 user_question = input("Please enter your question: ")
 
-# Tokenizing the user's question
-user_question_tokens = tokenize(user_question)
+# Step 1: Expand short forms
+expanded_question = expand_shortforms(user_question, shortforms)
 
-# Tokenizing the keys in the uni_document and creating the updated dictionary
+# Step 2: Tokenize the expanded question
+user_question_tokens = tokenize(expanded_question)
+
+# Step 3: Process as before
 uni_document_tokenized = {tokenize(key): value for key, value in uni_document.items()}
-
-# Count matches for each document
-document_tokens = list(uni_document_tokenized.keys())  # List of tokenized document keys
+document_tokens = list(uni_document_tokenized.keys())
 match_counts = count_matches_per_document(document_tokens, user_question_tokens)
-
-# Rank the documents based on the match count
 best_matching_document = rank_documents(match_counts, list(uni_document.values()))
 
-# Output the best matching answer
+# Output the result
 print(best_matching_document if best_matching_document else "Sorry, I couldn't find an answer to your question.")
